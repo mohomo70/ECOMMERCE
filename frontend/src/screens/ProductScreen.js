@@ -6,6 +6,7 @@ import Rating from '../components/Rating'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
 import { listProductDetails } from '../actions/productActions'
+import {productDetailsReducer} from '../reducers/productDetailReducer'
 
 const ProductScreen = ({ match }) => {
   const dispatch = useDispatch()
@@ -14,7 +15,7 @@ const ProductScreen = ({ match }) => {
   const { loading, error, product } = productDetails
 
   useEffect(() => {
-    dispatch(listProductDetails(match.params.id))
+    dispatch(productDetailsReducer(match.params.id))
   }, [dispatch, match])
 
   return (
