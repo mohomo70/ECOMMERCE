@@ -133,4 +133,5 @@ const orderPaySlice = createSlice({
     }
 })
 
+export const {reset} = orderPaySlice.actions
 export  {orderSlice , orderDetailSlice, orderPaySlice}
