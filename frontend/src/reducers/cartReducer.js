@@ -17,8 +17,12 @@ export const addToCart = createAsyncThunk('cart/addToCart', async ({id,qty}) =>{
   }
 })
 
+const cartItemFromStorage = localStorage.getItem('cartItems') ? JSON.parse(localStorage.getItem('cartItems')) : []
+const shippingAddressFromStorage = localStorage.getItem('shippingAddress') ? JSON.parse(localStorage.getItem('shippingAddress')) : {}
+
 const initialState = {
-    cartItems: [],
+    cartItems: cartItemFromStorage,
+    shippingAddress: shippingAddressFromStorage,
     status: "idle",
     error: null,
     loading: false,
@@ -30,7 +34,16 @@ const cartSlice = createSlice({
     reducers:{
         removeFromCart: (state,action) => {
             state.cartItems = state.cartItems.filter((x) => x.product !== action.payload)
+            localStorage.setItem('cartItems', JSON.stringify(state.cartItems))
             },
+        saveShippingAddress: (state, action) => {
+            state.shippingAddress = action.payload
+            localStorage.setItem('shippingAddress', JSON.stringify(state.shippingAddress))
+            },
+        savePaymentMethod: (state,action) => {
+            state.paymentMethod = action.payload
+            localStorage.setItem('paymentMethod', JSON.stringify(state.paymentMethod))
+        }
     },
     extraReducers:{
         [addToCart.pending]: (state) => {
@@ -49,6 +62,7 @@ const cartSlice = createSlice({
       } else {
           state.cartItems = [...state.cartItems,item]
       }
+      localStorage.setItem('cartItems', JSON.stringify(state.cartItems))
         },
         [addToCart.rejected]: (state, action) => {
             state.loading = false;
@@ -57,5 +71,5 @@ const cartSlice = createSlice({
     }
 })
 
-export const {removeFromCart} = cartSlice.actions
+export const {removeFromCart, saveShippingAddress, savePaymentMethod} = cartSlice.actions
 export default cartSlice.reducer

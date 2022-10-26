@@ -18,9 +18,9 @@ const CartScreen = ({ match, location, history }) => {
 
   useEffect(() => {
     if (productId) {
-      dispatch(addToCart({id:productId, qty:qty}))
+      dispatch(addToCart({id:productId, qty}))
     }
-  }, [dispatch, productId])
+  }, [dispatch, productId,qty])
 
   const removeFromCartHandler = (id) => {
     dispatch(removeFromCart(id))
