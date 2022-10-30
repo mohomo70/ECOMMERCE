@@ -59,6 +59,25 @@ export const payOrder = createAsyncThunk('order/pay', async({orderId, paymentRes
     }
 })
 
+export const listMyOrders = createAsyncThunk('order/listMyOrder', async (getState) => {
+    try{
+        const {
+            userLogin: { userInfo },
+          } = getState()
+      
+          const config = {
+            headers: {
+              Authorization: `Bearer ${userInfo.token}`,
+            },
+          }
+
+          const { data } = await axios.get(`/api/orders/myorders`, config)
+          return data
+
+    } catch (error) {
+        return error.response.data
+    }
+})
 
 const initialState = {
     status: "idle",
@@ -133,5 +152,26 @@ const orderPaySlice = createSlice({
     }
 })
 
+const orderListSlice = createSlice({
+    name: 'Order',
+    initialState:{
+        loading:true,
+        orders:[]
+    },
+    extraReducers: {
+        [listMyOrders.pending]: (state) => {
+            state.loading = true
+        },
+        [listMyOrders.fulfilled]: (state,action) => {
+            state.loading = false
+            state.orders = action.payload            
+        },
+        [listMyOrders.rejected]: (state, action) => {
+            state.loading = false;
+            state.error = action.payload
+        },
+    }
+})
+
 export const {reset} = orderPaySlice.actions
-export  {orderSlice , orderDetailSlice, orderPaySlice}
+export  {orderSlice , orderDetailSlice, orderPaySlice, orderListSlice}

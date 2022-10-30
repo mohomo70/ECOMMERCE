@@ -40,12 +40,66 @@
 import {createSlice, createAsyncThunk} from "@reduxjs/toolkit"
 import axios from 'axios'
 
-export const productListReducer = createAsyncThunk('PRODUCT_LIST', async () => {
+export const listProducts = createAsyncThunk('PRODUCT_LIST', async () => {
   try{
     const response = await axios.get('/api/products')
     return response.data
   }catch(err){
     return err.response.data
+  }
+})
+
+export const deleteProduct = createAsyncThunk('PRODUCT_DELETE', async (id, {getState}) => {
+  try{
+    const {
+      userLogin: { userInfo },
+    } = getState()
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    }
+    const {data} = await axios.delete(`/api/products/${id}`, config)
+    return data
+  }catch (error){
+    return error.response.data
+  }
+})
+
+export const createProduct = createAsyncThunk('PRODUCT_CREATE', async (_,{getState}) => {
+  try {
+    const {
+      userLogin: { userInfo },
+    } = getState()
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    }
+    const { data } = await axios.post(`/api/products`, {}, config)
+    return data
+  } catch (error) {
+    return error.response.data
+  }
+})
+
+export const updateProduct = createAsyncThunk('PRODUCT_UPDATE', async(product,{getState}) => {
+  try {
+    const {
+      userLogin: { userInfo },
+    } = getState()
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    }
+    const { data } = await axios.put(`/api/products/${product._id}`,product ,config)
+    return data
+  } catch (error) {
+    return error.response.data
   }
 })
 
@@ -60,18 +114,98 @@ const productSlice = createSlice({
   name: 'Products',
   initialState,
   extraReducers:{
-    [productListReducer.pending]: (state) =>{
+    [listProducts.pending]: (state) =>{
       state.loading = true
     },
-    [productListReducer.fulfilled]: (state, action) => {
+    [listProducts.fulfilled]: (state, action) => {
       state.loading = false
       state.products = action.payload
     },
-    [productListReducer.rejected]: (state, action) => {
+    [listProducts.rejected]: (state, action) => {
       state.loading = false
       state.error = action.payload.message
     }
   }
 })
 
-export default productSlice.reducer
+const productDeleteSlice = createSlice({
+  name: 'Products',
+  initialState:{
+    loading: false,
+    success: true
+  },
+  extraReducers:{
+    [deleteProduct.pending]: (state) =>{
+      state.loading = true
+    },
+    [deleteProduct.fulfilled]: (state) => {
+      state.loading = false
+      state.success = true
+    },
+    [deleteProduct.rejected]: (state, action) => {
+      state.loading = false
+      state.error = action.payload.message
+    }
+  }
+})
+
+const productCreateSlice = createSlice({
+  name:'Products',
+  initialState: {
+    loading: false,
+    success: false,
+    product: []
+  },
+  reducers:{
+    resetProducts: (state) => {
+      state.product = []
+    }
+  },
+  extraReducers:{
+    [createProduct.pending]: (state) =>{
+      state.loading = true
+    },
+    [createProduct.fulfilled]: (state, action) => {
+      state.loading = false
+      state.success = true
+      state.product = action.payload
+    },
+    [createProduct.rejected]: (state, action) => {
+      state.loading = false
+      state.error = action.payload.message
+    }
+  }
+})
+
+const productUpdateSclie = createSlice({
+  name: 'Products',
+  initialState: {
+    product: {},
+    loading:false,
+    success:false,
+  },
+  reducers:{
+    resetUpdateProducts:(state) => {
+      state.product = {}
+    }
+  },
+    extraReducers:{
+      [updateProduct.pending]: (state) =>{
+        state.loading = true
+      },
+      [updateProduct.fulfilled]: (state, action) => {
+        state.loading = false
+        state.success = true
+        state.product = action.payload
+      },
+      [updateProduct.rejected]: (state, action) => {
+        state.loading = false
+        state.error = action.payload.message
+      }
+  }
+
+})
+
+export const {resetProducts} = productCreateSlice.actions 
+export const {resetUpdateProducts} = productUpdateSclie.actions
+export  { productDeleteSlice, productSlice, productCreateSlice, productUpdateSclie }

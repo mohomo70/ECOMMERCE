@@ -5,7 +5,7 @@ import Product from '../components/Product'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
 // import { listProducts } from '../actions/productActions'
-import { productListReducer } from '../reducers/productReducers'
+import { listProducts } from '../reducers/productReducers'
 
 const HomeScreen = () => {
   const dispatch = useDispatch()
@@ -14,7 +14,7 @@ const HomeScreen = () => {
   const { loading, error, products } = productList
 
   useEffect(() => {
-    dispatch(productListReducer())
+    dispatch(listProducts())
   }, [dispatch])
   
   console.log(productList)
