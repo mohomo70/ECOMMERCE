@@ -59,7 +59,7 @@ export const payOrder = createAsyncThunk('order/pay', async({orderId, paymentRes
     }
 })
 
-export const listMyOrders = createAsyncThunk('order/listMyOrder', async (getState) => {
+export const listMyOrders = createAsyncThunk('order/listMyOrder', async (_,{getState}) => {
     try{
         const {
             userLogin: { userInfo },
@@ -76,6 +76,48 @@ export const listMyOrders = createAsyncThunk('order/listMyOrder', async (getStat
 
     } catch (error) {
         return error.response.data
+    }
+})
+
+export const deliverOrder = createAsyncThunk('order/Deliver', async(order,{getState}) => {
+    try{
+        const {
+            userLogin: { userInfo },
+          } = getState()
+      
+          const config = {
+            headers: {
+              Authorization: `Bearer ${userInfo.token}`,
+            },
+          }
+       
+        const { data } = await axios.put(
+        `/api/orders/${order._id}/deliver`,
+        {},
+        config
+        )
+          return data
+
+    } catch (error) {
+        return error.response.data
+    }
+})
+
+export const listOrders = createAsyncThunk('order/listOrders', async(_,{getState}) => {
+    try{
+        const {
+            userLogin: { userInfo },
+          } = getState()
+      
+          const config = {
+            headers: {
+              Authorization: `Bearer ${userInfo.token}`,
+            },
+          }
+          const { data } = await axios.get(`/api/orders`, config)
+          return data
+    } catch (err){
+        return err.response.data
     }
 })
 
@@ -152,10 +194,10 @@ const orderPaySlice = createSlice({
     }
 })
 
-const orderListSlice = createSlice({
+const orderListMySlice = createSlice({
     name: 'Order',
     initialState:{
-        loading:true,
+        loading:false,
         orders:[]
     },
     extraReducers: {
@@ -173,5 +215,49 @@ const orderListSlice = createSlice({
     }
 })
 
+const orderDeliverSlice = createSlice({
+    name: 'OrderDeliver',
+    initialState:{
+        loading:false,
+        successs:false,
+    },
+    reducers : {
+        orderDeliverReset: (state) => {
+            state = {loading:false,successs:false}
+            }
+    },
+    [deliverOrder.pending]: (state) => {
+        state.loading = true
+    },
+    [deliverOrder.fulfilled]: (state) => {
+        state.loading = false
+        state.success = true           
+    },
+    [deliverOrder.rejected]: (state, action) => {
+        state.loading = false;
+        state.error = action.payload
+    },
+})
+
+const orderListSlice = createSlice({
+    name: 'OrderList',
+    initialState:{
+        loading: false,
+        orders:[]
+    },
+    [listOrders.pending]: (state) => {
+        state.loading = true
+    },
+    [listOrders.fulfilled]: (state, action) => {
+        state.loading = false
+        state.orders = action.payload           
+    },
+    [listOrders.rejected]: (state, action) => {
+        state.loading = false;
+        state.error = action.payload
+    },
+})
+
 export const {reset} = orderPaySlice.actions
-export  {orderSlice , orderDetailSlice, orderPaySlice, orderListSlice}
+export const {orderDeliverReset} = orderDeliverSlice.actions
+export  {orderSlice , orderDetailSlice, orderPaySlice, orderListMySlice , orderDeliverSlice, orderListSlice}

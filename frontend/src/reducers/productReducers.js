@@ -40,9 +40,9 @@
 import {createSlice, createAsyncThunk} from "@reduxjs/toolkit"
 import axios from 'axios'
 
-export const listProducts = createAsyncThunk('PRODUCT_LIST', async () => {
+export const listProducts = createAsyncThunk('PRODUCT_LIST', async (keyword = '') => {
   try{
-    const response = await axios.get('/api/products')
+    const response = await axios.get(`/api/products?keyword=${keyword}`)
     return response.data
   }catch(err){
     return err.response.data
@@ -98,6 +98,27 @@ export const updateProduct = createAsyncThunk('PRODUCT_UPDATE', async(product,{g
     }
     const { data } = await axios.put(`/api/products/${product._id}`,product ,config)
     return data
+  } catch (error) {
+    return error.response.data
+  }
+})
+
+export const createProductReview = createAsyncThunk('PRODUCT_REVIEW_CREATE', async({productId,review},{getState}) => {
+  try{
+    const {
+      userLogin: { userInfo },
+    } = getState()
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    }
+
+    const {data} = await axios.post(`/api/products/${productId}/reviews`, review, config)
+    return data
+
   } catch (error) {
     return error.response.data
   }
@@ -190,7 +211,7 @@ const productUpdateSclie = createSlice({
     }
   },
     extraReducers:{
-      [updateProduct.pending]: (state) =>{
+      [updateProduct.pending]: (state) => {
         state.loading = true
       },
       [updateProduct.fulfilled]: (state, action) => {
@@ -206,6 +227,33 @@ const productUpdateSclie = createSlice({
 
 })
 
+const productReviewCreateSlice = createSlice({
+  name:'ProductsReview',
+  initialState:{
+    loading : false,
+    success : false,
+  },
+  reducers: {
+    createReviewReset: (state) => {
+      state = {}
+    }
+  },
+  extraReducers: {
+    [createProductReview.pending]: (state) => {
+      state.loading = true
+    },
+    [createProductReview.fulfilled]: (state) => {
+      state.loading = false
+      state.success = true
+    },
+    [createProductReview.rejected]: (state, action) => {
+      state.loading = false
+      state.error = action.payload.message
+    }
+  }
+})
+
 export const {resetProducts} = productCreateSlice.actions 
 export const {resetUpdateProducts} = productUpdateSclie.actions
-export  { productDeleteSlice, productSlice, productCreateSlice, productUpdateSclie }
+export const {createReviewReset} = productUpdateSclie.actions
+export  { productDeleteSlice, productSlice, productCreateSlice, productUpdateSclie, productReviewCreateSlice }
