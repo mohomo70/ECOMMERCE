@@ -35,12 +35,7 @@ const App = () => {
           <Route path='/shipping' component={ShippingScreen} />
           <Route path='/product/:id' component={ProductScreen} />
           <Route path = '/cart/:id?' component={CartScreen} />
-          <Route path='/admin/userlist' component={UserListScreen} />
-          <Route path='/admin/user/:id/edit' component={UserEditScreen} />
-          <Route path='/admin/productlist' component={ProductListScreen} />
-          <Route path='/admin/product/:id/edit' component={ProductEditScreen} />
-          <Route path='/admin/orderlist' component={OrderListScreen} />
-          <Route path='/search/:keyword' component={HomeScreen} />
+          
         </Container>
       </main>
       <Footer />
